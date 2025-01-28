@@ -1,0 +1,18 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<odoo>
+  <record id="kreatys_sale_order_last_product_price" model="ir.ui.view">
+    <field name="arch" type="xml">
+      <data>
+        <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='order_lines']/field[@name='order_line']/list[1]/field[@name='product_uom_qty']" position="after">
+          <field name="last_product_price" optional="show"/>
+        </xpath>
+      </data>
+    </field>
+    <field name="inherit_id" ref="sale.view_order_form"/>
+    <field name="mode">extension</field>
+    <field name="model">sale.order</field>
+    <field name="name">Kreatys: sale.order.form last product price</field>
+    <field name="priority">160</field>
+    <field name="type">form</field>
+  </record>
+</odoo>
