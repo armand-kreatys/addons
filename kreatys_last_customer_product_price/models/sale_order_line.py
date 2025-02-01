@@ -5,7 +5,7 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     last_product_price = fields.Float(
-        string='Dernier prix pratiqué', readonly=True)
+        string='Dernier prix', readonly=True)
 
     @api.onchange('product_id', 'order_partner_id')
     def _compute_last_product_price(self):
