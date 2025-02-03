@@ -24,7 +24,7 @@ class SaleOrderLine(models.Model):
                     order_line = devis.order_line.filtered(
                         lambda l: l.product_id == line.product_id)
                     if order_line:
-                        last_product_price = order_line[0].price_unit
+                        last_product_price = order_line[0].price_subtotal
 
                 # Sinon, recherche des dernières factures du client
                 else:
