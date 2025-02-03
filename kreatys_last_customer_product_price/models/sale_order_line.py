@@ -39,6 +39,6 @@ class SaleOrderLine(models.Model):
                         invoice_line = factures[0].invoice_line_ids.filtered(
                             lambda l: l.product_id == line.product_id)
                         if invoice_line:
-                            last_product_price = invoice_line[0].price_unit
+                            last_product_price = invoice_line[0].price_subtotal
 
                 line.last_product_price = last_product_price
