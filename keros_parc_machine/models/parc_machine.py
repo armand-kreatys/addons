@@ -31,8 +31,10 @@ class ParcMachine(models.Model):
     loan_location = fields.Char(string='Lieu du prêt')
     flash_count = fields.Integer(string='Nombre de Flashs')
     flash_count_date = fields.Date(string='Date de relevé du nombre de flashs')
-    last_delivery_date = fields.Date(string='Date d\'expédition')
-    delivery_order_number = fields.Char(string='Numéro du bon de livraison')
+    last_delivery_date = fields.Date(
+        string='Date d\'expédition', compute='_compute_last_delivery', store=True)
+    delivery_order_number = fields.Char(
+        string='Numéro du bon de livraison', compute='_compute_last_delivery', store=True)
     ram_number = fields.Char(string='Numéro du RAM')
     comment = fields.Text(string='Commentaires')
     location_id = fields.Many2one(
@@ -41,6 +43,21 @@ class ParcMachine(models.Model):
         'product.product', string='Référence de l\'article', related='serial_number.product_id', store=True)
     rma_number = fields.Char(string='N° de RMA')
     color = fields.Integer(string='Couleur Index', default=0)
+
+    @api.depends('serial_number')
+    def _compute_last_delivery(self):
+        for record in self:
+            delivery_move = self.env['stock.move'].search([
+                ('product_id', '=', record.product_id.id),
+                ('picking_type_id.code', '=', 'outgoing'),  # Mouvement de sortie
+                ('move_line_ids.lot_id', '=', record.serial_number.id)
+            ], order='date desc', limit=1)
+            if delivery_move:
+                record.last_delivery_date = delivery_move.date
+                record.delivery_order_number = delivery_move.picking_id.name
+            else:
+                record.last_delivery_date = False
+                record.delivery_order_number = False
 
     @api.depends('serial_number')
     def _compute_acquisition_date(self):
@@ -83,65 +100,65 @@ class ParcMachine(models.Model):
                 self.loan_location = False
                 _logger.info("No ongoing loan location found")
 
-    @api.onchange('status')
-    def _onchange_status(self):
-        if self.status == 'hors_service':
-            self.send_email_to_mariette()
-            _logger.info(
-                f"Status changed to 'Hors Service' for record {self.id}")
+    # @api.onchange('status')
+    # def _onchange_status(self):
+    #     if self.status == 'hors_service':
+    #         self.send_email_to_mariette()
+    #         _logger.info(
+    #             f"Status changed to 'Hors Service' for record {self.id}")
 
-    def send_email_to_mariette(self):
-        template = self.env.ref(
-            'keros_parc_machine.email_template_hors_service')
-        if template:
-            template.send_mail(self.id, force_send=True)
-            _logger.info(f"Email sent to Mariette for record {self.id}")
-        else:
-            _logger.error(
-                "Email template 'keros_parc_machine.email_template_hors_service' not found")
+    # def send_email_to_mariette(self):
+    #     template = self.env.ref(
+    #         'keros_parc_machine.email_template_hors_service')
+    #     if template:
+    #         template.send_mail(self.id, force_send=True)
+    #         _logger.info(f"Email sent to Mariette for record {self.id}")
+    #     else:
+    #         _logger.error(
+    #             "Email template 'keros_parc_machine.email_template_hors_service' not found")
 
-    def action_send_to_repair(self):
-        for record in self:
-            _logger.debug(f"Sending machine {record.name} to repair")
-            if record.product_id:
-                # Création de la demande de réparation
-                repair_vals = {
-                    'product_id': record.product_id.id,
-                    'product_qty': 1.0,
-                    'product_uom': record.product_id.uom_id.id,
-                    'name': f"Réparation - {record.name}",
-                    'lot_id': record.serial_number.id,
-                    'location_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
-                    'location_dest_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
-                }
-                repair_order = self.env['repair.order'].create(repair_vals)
-                _logger.info(
-                    f"Repair order {repair_order.name} created for machine {record.name}")
+    # def action_send_to_repair(self):
+    #     for record in self:
+    #         _logger.debug(f"Sending machine {record.name} to repair")
+    #         if record.product_id:
+    #             # Création de la demande de réparation
+    #             repair_vals = {
+    #                 'product_id': record.product_id.id,
+    #                 'product_qty': 1.0,
+    #                 'product_uom': record.product_id.uom_id.id,
+    #                 'name': f"Réparation - {record.name}",
+    #                 'lot_id': record.serial_number.id,
+    #                 'location_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
+    #                 'location_dest_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
+    #             }
+    #             repair_order = self.env['repair.order'].create(repair_vals)
+    #             _logger.info(
+    #                 f"Repair order {repair_order.name} created for machine {record.name}")
 
-                # Changer le statut de la machine (optionnel)
-                record.status = 'sav'
+    #             # Changer le statut de la machine (optionnel)
+    #             record.status = 'sav'
 
-                # Ouvrir la vue formulaire de la réparation créée
-                return {
-                    'type': 'ir.actions.act_window',
-                    'name': 'Demande de Réparation',
-                    'view_mode': 'form',
-                    'res_model': 'repair.order',
-                    'res_id': repair_order.id,
-                    'target': 'current',  # Ouvre la vue dans une nouvelle fenêtre
-                }
-            else:
-                _logger.error(
-                    f"No product associated with machine {record.name}")
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {
-                        'title': 'Erreur',
-                        'message': 'Aucun produit associé à cette machine.',
-                        'sticky': False,
-                    }
-                }
+    #             # Ouvrir la vue formulaire de la réparation créée
+    #             return {
+    #                 'type': 'ir.actions.act_window',
+    #                 'name': 'Demande de Réparation',
+    #                 'view_mode': 'form',
+    #                 'res_model': 'repair.order',
+    #                 'res_id': repair_order.id,
+    #                 'target': 'current',  # Ouvre la vue dans une nouvelle fenêtre
+    #             }
+    #         else:
+    #             _logger.error(
+    #                 f"No product associated with machine {record.name}")
+    #             return {
+    #                 'type': 'ir.actions.client',
+    #                 'tag': 'display_notification',
+    #                 'params': {
+    #                     'title': 'Erreur',
+    #                     'message': 'Aucun produit associé à cette machine.',
+    #                     'sticky': False,
+    #                 }
+    #             }
 
     def action_view_form(self):
         self.ensure_one()
