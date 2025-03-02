@@ -111,16 +111,37 @@ class ParcMachine(models.Model):
                     'product_uom': record.product_id.uom_id.id,
                     'name': f"Réparation - {record.name}",
                     'lot_id': record.serial_number.id,
-                    'location_id': record.location_id.id,
-                    'location_dest_id': record.location_id.id,
+                    'location_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
+                    'location_dest_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
                 }
                 repair_order = self.env['repair.order'].create(repair_vals)
                 _logger.info(
                     f"Repair order {repair_order.name} created for machine {record.name}")
-                record.status = 'sav'  # Optionnel : changer le statut de la machine
+
+                # Changer le statut de la machine (optionnel)
+                record.status = 'sav'
+
+                # Ouvrir la vue formulaire de la réparation créée
+                return {
+                    'type': 'ir.actions.act_window',
+                    'name': 'Demande de Réparation',
+                    'view_mode': 'form',
+                    'res_model': 'repair.order',
+                    'res_id': repair_order.id,
+                    'target': 'current',  # Ouvre la vue dans une nouvelle fenêtre
+                }
             else:
                 _logger.error(
                     f"No product associated with machine {record.name}")
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'Erreur',
+                        'message': 'Aucun produit associé à cette machine.',
+                        'sticky': False,
+                    }
+                }
 
     def action_view_form(self):
         self.ensure_one()
