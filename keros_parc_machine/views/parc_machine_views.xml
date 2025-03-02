@@ -16,30 +16,53 @@
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
             <form string="Parc Machine">
+                <!-- Header avec le bouton Envoyer en Réparation -->
+                <header>
+                    <button name="action_send_to_repair" string="Envoyer en Réparation" type="object"
+                            class="oe_highlight"/>
+                    <field name="status" widget="statusbar" clickable="1"/>
+                </header>
+
+                <!-- Contenu principal -->
                 <sheet>
+                    <!-- Groupe 1 : Informations générales -->
                     <group>
-                        <field name="name"/>
-                        <field name="serial_number"/>
-                        <field name="manufacturer"/>
-                        <field name="acquisition_date"/>
-                        <field name="warranty_start_date"/>
-                        <field name="warranty_end_date"/>
-                        <field name="rma_warranty_end_date"/>
-                        <field name="status"/>
-                        <field name="loan_location"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="partner_id"/>
+                            <field name="serial_number"/>
+                            <field name="manufacturer"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="acquisition_date" readonly="1"/>
+                            <field name="warranty_start_date"/>
+                            <field name="warranty_end_date"/>
+                            <field name="rma_warranty_end_date"/>
+                        </group>
+                    </group>
+
+                    <!-- Groupe 2 : Statut et emplacement -->
+                    <group>
+                        <group>
+                            <field name="status"/>
+                            <field name="loan_location"/>
+                            <field name="location_id"/>
+                        </group>
+                        <group>
+                            <field name="ram_number"/>
+                            <field name="rma_number"/>
+                            <field name="comment" modifiers="{&quot;readonly&quot;: [[&quot;status&quot;, &quot;=&quot;, &quot;hors_service&quot;]]}"/>
+                        </group>
+                    </group>
+
+                    <!-- Groupe 3 : Données techniques -->
+                    <group string="Données Techniques">
                         <field name="flash_count"/>
                         <field name="flash_count_date"/>
                         <field name="last_delivery_date"/>
                         <field name="delivery_order_number"/>
-                        <field name="ram_number"/>
-                        <field name="comment"/>
-                        <field name="location_id"/>
-                        <field name="product_id"/>
-                        <field name="rma_number"/>
                     </group>
-                    <header>
-                        <button name="action_send_to_repair" string="Envoyer en Réparation" type="object" class="oe_highlight"/>
-                    </header>
                 </sheet>
             </form>
         </field>
@@ -50,25 +73,17 @@
         <field name="name">parc.machine.list</field>
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
-            <list string="Parc Machine">
+            <list string="Parc Machine" create="true" delete="true">
+                <!-- Colonnes essentielles -->
                 <field name="name"/>
+                <field name="partner_id"/>
                 <field name="serial_number"/>
-                <field name="manufacturer"/>
-                <field name="acquisition_date"/>
-                <field name="warranty_start_date"/>
-                <field name="warranty_end_date"/>
-                <field name="rma_warranty_end_date"/>
                 <field name="status"/>
-                <field name="loan_location"/>
-                <field name="flash_count"/>
-                <field name="flash_count_date"/>
-                <field name="last_delivery_date"/>
-                <field name="delivery_order_number"/>
-                <field name="ram_number"/>
-                <field name="location_id"/>
-                <field name="product_id"/>
-                <field name="rma_number"/>
-                <button name="action_view_form" string="Ouvrir" type="object" icon="fa-eye" class="oe_highlight"/>
+                <field name="acquisition_date"/>
+                <field name="warranty_end_date"/>
+
+                <!-- Bouton pour actions rapides -->
+                <button name="action_view_form" type="object" string="Voir Détails" class="oe_highlight"/>
             </list>
         </field>
     </record>
@@ -79,22 +94,35 @@
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
             <kanban default_group_by="status">
+                <!-- Définition des couleurs pour les statuts -->
+                <field name="status"/>
+                <field name="partner_id"/>
+                <field name="serial_number"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div class="oe_kanban_global_click">
-                            <div class="oe_kanban_details">
-                                <div class="oe_kanban_content">
-                                    <strong><field name="name"/></strong>
-                                    <div><field name="serial_number"/></div>
-                                    <div><field name="manufacturer"/></div>
-                                    <div><field name="status"/></div>
-                                </div>
+                        <div class="oe_kanban_global_click o_kanban_record card text-center"
+                            style="background-color: #eaeaea; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
+                            <!-- Titre de la machine -->
+                            <div class="o_kanban_record_title">
+                                <strong><field name="name"/></strong>
                             </div>
-                            <div class="oe_kanban_footer">
-                                <div class="oe_kanban_bottom_right">
-                                    <button name="action_send_to_repair" string="Envoyer en Réparation" type="object" class="oe_highlight"/>
-                                    <button name="action_view_form" string="Ouvrir" type="object" icon="fa-eye" class="oe_highlight"/>
-                                </div>
+
+                            <!-- Informations principales -->
+                            <div class="o_kanban_record_details mt-2">
+                                <p><b>Partenaire :</b> <field name="partner_id"/></p>
+                                <p><b>Numéro de série :</b> <field name="serial_number"/></p>
+                                <p><b>Statut :</b> <field name="status"/></p>
+                            </div>
+
+                            <!-- Actions rapides -->
+                            <div class="mt-2">
+                                <button type="object" name="action_view_form" class="btn btn-primary btn-sm">
+                                    Voir Détails
+                                </button>
+                                <button type="object" name="action_send_to_repair" class="btn btn-success btn-sm"
+                                        t-if="record.status.raw_value in ['pret', 'a_revenir', 'echange_standard', 'reserve_location']">
+                                    Envoyer en Réparation
+                                </button>
                             </div>
                         </div>
                     </t>
@@ -102,4 +130,5 @@
             </kanban>
         </field>
     </record>
+
 </odoo>
