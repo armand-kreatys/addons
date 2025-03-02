@@ -153,3 +153,32 @@ class ParcMachine(models.Model):
             'res_id': self.id,
             'target': 'current',
         }
+
+# REPAIR ORDERS
+    repair_part_count = fields.Integer(
+        string="Repair Parts", compute="_compute_repair_counts"
+    )
+    in_repair_count = fields.Integer(
+        string="To Do", compute="_compute_repair_counts"
+    )
+    repaired_count = fields.Integer(
+        string="Done", compute="_compute_repair_counts"
+    )
+
+    @api.depends('serial_number')
+    def _compute_repair_counts(self):
+        for record in self:
+            if record.serial_number:
+                record.repair_part_count = record.serial_number.repair_part_count
+                record.in_repair_count = record.serial_number.in_repair_count
+                record.repaired_count = record.serial_number.repaired_count
+            else:
+                record.repair_part_count = 0
+                record.in_repair_count = 0
+                record.repaired_count = 0
+
+    def serial_number_action_view_ro(self):
+        return self.serial_number.action_view_ro()
+
+    def serial_number_action_lot_open_repairs(self):
+        return self.serial_number.action_lot_open_repairs()
