@@ -39,8 +39,6 @@ class ParcMachine(models.Model):
         'stock.location', string='Emplacement de stockage')
     product_id = fields.Many2one(
         'product.product', string='Référence de l\'article', related='serial_number.product_id', store=True)
-    description = fields.Text(string='Description de l\'article',
-                              related='product_id.description_sale', store=True)
     rma_number = fields.Char(string='N° de RMA')
     color = fields.Integer(string='Couleur Index', default=0)
 
@@ -54,7 +52,7 @@ class ParcMachine(models.Model):
                 purchase_line = self.env['purchase.order.line'].search([
                     ('product_id', '=', record.product_id.id),
                     ('move_ids.move_line_ids.lot_id', '=', record.serial_number.id)
-                ], order='order_id.date_order asc', limit=1)
+                ], order='date_order asc', limit=1)
                 if purchase_line:
                     record.acquisition_date = purchase_line.order_id.date_order
                     _logger.info(
