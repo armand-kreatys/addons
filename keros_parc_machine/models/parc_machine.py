@@ -65,7 +65,7 @@ class ParcMachine(models.Model):
             _logger.debug(
                 f"Computing acquisition date for record {record.id} with serial number {record.serial_number.name}")
             if record.serial_number:
-                # Recherche de la facture d'achat la plus ancienne contenant le lot
+                # Recherche de la facture d'achat la plus ancienne contenant le lot/numéro de série
                 purchase_line = self.env['purchase.order.line'].search([
                     ('product_id', '=', record.product_id.id),
                     ('move_ids.move_line_ids.lot_id', '=', record.serial_number.id)

@@ -1,12 +1,17 @@
 <odoo>
-    <!-- Définition de l'action pour ouvrir la vue liste -->
     <record id="action_parc_machine" model="ir.actions.act_window">
         <field name="name">Parc Machine</field>
         <field name="res_model">parc.machine</field>
-        <field name="view_mode">list,form,kanban</field>
+        <field name="view_mode">kanban,form,list</field> <!-- Vue Kanban en premier -->
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Aucune machine n'a encore été enregistrée.
+            </p>
+            <p>Cliquez sur 'Nouveau' pour ajouter une nouvelle machine.</p>
+        </field>
     </record>
 
-    <!-- Intégration dans le menu Assistance -->
+    <!-- Menu Assistance -->
     <menuitem id="menu_parc_machine_helpdesk" name="Parc Machine" parent="helpdesk.menu_helpdesk_root" action="action_parc_machine" sequence="100"/>
 
 
@@ -60,14 +65,14 @@
                 
                     <!-- Groupe 1 : Informations générales -->
                     <group>
-                        <group>
+                        <group string="Informations Générales">
                             <field name="name"/>
                             <field name="partner_id"/>
                             <field name="serial_number"/>
                             <field name="manufacturer"/>
                             <field name="product_id"/>
                         </group>
-                        <group>
+                        <group string="Garantie">
                             <field name="acquisition_date" readonly="1"/>
                             <field name="warranty_start_date"/>
                             <field name="warranty_end_date"/>
@@ -77,12 +82,12 @@
 
                     <!-- Groupe 2 : Statut et emplacement -->
                     <group>
-                        <group>
+                        <group string="Statut et Emplacement">
                             <field name="status"/>
                             <field name="loan_location"/>
                             <field name="location_id"/>
                         </group>
-                        <group>
+                        <group string="RAM et RMA">
                             <field name="ram_number"/>
                             <field name="rma_number"/>
                             <field name="comment" modifiers="{&quot;readonly&quot;: [[&quot;status&quot;, &quot;=&quot;, &quot;hors_service&quot;]]}"/>
@@ -107,15 +112,12 @@
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
             <list string="Parc Machine" create="true" delete="true">
-                <!-- Colonnes essentielles -->
                 <field name="name"/>
                 <field name="partner_id"/>
                 <field name="serial_number"/>
                 <field name="status"/>
                 <field name="acquisition_date"/>
                 <field name="warranty_end_date"/>
-
-                <!-- Bouton pour actions rapides -->
                 <button name="action_view_form" type="object" string="Voir Détails" class="oe_highlight"/>
             </list>
         </field>
@@ -127,7 +129,6 @@
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
             <kanban default_group_by="status">
-                <!-- Définition des couleurs pour les statuts -->
                 <field name="status"/>
                 <field name="partner_id"/>
                 <field name="serial_number"/>

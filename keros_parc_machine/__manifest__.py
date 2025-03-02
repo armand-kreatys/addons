@@ -2,8 +2,10 @@
     'name': 'Parc Machine',
     'version': '1.0',
     'summary': 'Gestion du parc machine',
-    'description': 'Module pour gérer le parc machine, les garanties et les incidents.',
-    'author': 'Votre Nom',
+    'description': 'Module pour gérer le parc machine.',
+    'author': 'armand-kreatys',
+    'website': 'https://integrateur-odoo.kreatys.com',
+    'category': 'KREATYS',
     'depends': ['base', 'stock', 'maintenance', 'sale_management', 'purchase', 'helpdesk', 'repair'],
     'data': [
         'security/ir.model.access.csv',
