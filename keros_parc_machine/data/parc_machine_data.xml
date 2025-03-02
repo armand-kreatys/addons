@@ -3,7 +3,7 @@
         <field name="subject">Machine Hors Service: ${object.name}</field>
         <field name="body_html"><![CDATA[
             <p>Bonjour Mariette,</p>
-            <p>La machine ${object.name} (${object.serial_number}) a été déclarée hors service.</p>
+            <p>La machine ${object.name} (${object.serial_number.name}) a été déclarée hors service.</p>
             <p>Merci de prendre en charge les écritures comptables.</p>
             <br/>
             Cordialement,<br/>
