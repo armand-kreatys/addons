@@ -1,0 +1,16 @@
+<odoo>
+    <template id="email_template_hors_service" name="Email Hors Service">
+        <field name="subject">Machine Hors Service: ${object.name}</field>
+        <field name="body_html"><![CDATA[
+            <p>Bonjour Mariette,</p>
+            <p>La machine ${object.name} (${object.serial_number}) a été déclarée hors service.</p>
+            <p>Merci de prendre en charge les écritures comptables.</p>
+            <br/>
+            Cordialement,<br/>
+            Odoo
+        ]]></field>
+        <field name="email_to">mariette@example.com</field>
+        <field name="email_from">${object.create_uid.email or ''}</field>
+        <field name="model_id" ref="model_parc_machine"/>
+    </template>
+</odoo>

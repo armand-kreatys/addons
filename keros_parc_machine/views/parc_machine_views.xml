@@ -1,0 +1,105 @@
+<odoo>
+    <!-- Définition de l'action pour ouvrir la vue liste -->
+    <record id="action_parc_machine" model="ir.actions.act_window">
+        <field name="name">Parc Machine</field>
+        <field name="res_model">parc.machine</field>
+        <field name="view_mode">list,form,kanban</field>
+    </record>
+
+    <!-- Intégration dans le menu Assistance -->
+    <menuitem id="menu_parc_machine_helpdesk" name="Parc Machine" parent="helpdesk.menu_helpdesk_root" action="action_parc_machine" sequence="100"/>
+
+
+    <!-- Vue Forme -->
+    <record id="view_parc_machine_form" model="ir.ui.view">
+        <field name="name">parc.machine.form</field>
+        <field name="model">parc.machine</field>
+        <field name="arch" type="xml">
+            <form string="Parc Machine">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="serial_number"/>
+                        <field name="manufacturer"/>
+                        <field name="acquisition_date"/>
+                        <field name="warranty_start_date"/>
+                        <field name="warranty_end_date"/>
+                        <field name="rma_warranty_end_date"/>
+                        <field name="status"/>
+                        <field name="loan_location"/>
+                        <field name="flash_count"/>
+                        <field name="flash_count_date"/>
+                        <field name="last_delivery_date"/>
+                        <field name="delivery_order_number"/>
+                        <field name="ram_number"/>
+                        <field name="comment"/>
+                        <field name="location_id"/>
+                        <field name="product_id"/>
+                        <field name="rma_number"/>
+                    </group>
+                    <header>
+                        <button name="action_send_to_repair" string="Envoyer en Réparation" type="object" class="oe_highlight"/>
+                    </header>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vue Liste -->
+    <record id="view_parc_machine_list" model="ir.ui.view">
+        <field name="name">parc.machine.list</field>
+        <field name="model">parc.machine</field>
+        <field name="arch" type="xml">
+            <list string="Parc Machine">
+                <field name="name"/>
+                <field name="serial_number"/>
+                <field name="manufacturer"/>
+                <field name="acquisition_date"/>
+                <field name="warranty_start_date"/>
+                <field name="warranty_end_date"/>
+                <field name="rma_warranty_end_date"/>
+                <field name="status"/>
+                <field name="loan_location"/>
+                <field name="flash_count"/>
+                <field name="flash_count_date"/>
+                <field name="last_delivery_date"/>
+                <field name="delivery_order_number"/>
+                <field name="ram_number"/>
+                <field name="location_id"/>
+                <field name="product_id"/>
+                <field name="rma_number"/>
+                <button name="action_view_form" string="Ouvrir" type="object" icon="fa-eye" class="oe_highlight"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vue Kanban -->
+    <record id="view_parc_machine_kanban" model="ir.ui.view">
+        <field name="name">parc.machine.kanban</field>
+        <field name="model">parc.machine</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click">
+                            <div class="oe_kanban_details">
+                                <div class="oe_kanban_content">
+                                    <strong><field name="name"/></strong>
+                                    <div><field name="serial_number"/></div>
+                                    <div><field name="manufacturer"/></div>
+                                    <div><field name="status"/></div>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_footer">
+                                <div class="oe_kanban_bottom_right">
+                                    <button name="action_send_to_repair" string="Envoyer en Réparation" type="object" class="oe_highlight"/>
+                                    <button name="action_view_form" string="Ouvrir" type="object" icon="fa-eye" class="oe_highlight"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>
