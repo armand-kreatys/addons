@@ -13,7 +13,12 @@ class ParcMachine(models.Model):
         'res.partner', string='Partenaire', store=True)
     serial_number = fields.Many2one(
         'stock.lot', string='Numéro de Série', required=True)
-    manufacturer = fields.Many2one('res.partner', string='Fabricant')
+    manufacturer = fields.Many2one(
+        related='product_id.manufacturer',
+        string='Fabricant',
+        store=True,
+        readonly=True
+    )
     acquisition_date = fields.Date(
         string='Date d\'Acquisition', compute='_compute_acquisition_date', store=True)
     warranty_start_date = fields.Date(string='Début Garantie')
@@ -27,7 +32,7 @@ class ParcMachine(models.Model):
         ('reserve_location', 'Réservé location'),
         ('ram', 'RAM'),
         ('hors_service', 'Hors Service')
-    ], string='Statut')
+    ], string='Statut', default='pret')
     loan_location = fields.Char(string='Lieu du prêt')
     flash_count = fields.Integer(string='Nombre de Flashs')
     flash_count_date = fields.Date(string='Date de relevé du nombre de flashs')
@@ -38,7 +43,11 @@ class ParcMachine(models.Model):
     ram_number = fields.Char(string='Numéro du RAM')
     comment = fields.Text(string='Commentaires')
     location_id = fields.Many2one(
-        'stock.location', string='Emplacement de stockage')
+        related='serial_number.location_id',
+        string='Emplacement de stockage',
+        store=True,
+        readonly=True
+    )
     product_id = fields.Many2one(
         'product.product', string='Référence de l\'article', related='serial_number.product_id', store=True)
     rma_number = fields.Char(string='N° de RMA')
@@ -65,7 +74,7 @@ class ParcMachine(models.Model):
             _logger.debug(
                 f"Computing acquisition date for record {record.id} with serial number {record.serial_number.name}")
             if record.serial_number:
-                # Recherche de la facture d'achat la plus ancienne contenant le lot/numéro de série
+                # Recherche de la l'achat le plus ancienne contenant le lot/numéro de série
                 purchase_line = self.env['purchase.order.line'].search([
                     ('product_id', '=', record.product_id.id),
                     ('move_ids.move_line_ids.lot_id', '=', record.serial_number.id)
@@ -171,7 +180,7 @@ class ParcMachine(models.Model):
             'target': 'current',
         }
 
-# REPAIR ORDERS
+    # Repair orders
     repair_part_count = fields.Integer(
         string="Repair Parts", compute="_compute_repair_counts"
     )

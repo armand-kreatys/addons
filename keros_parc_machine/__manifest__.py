@@ -12,6 +12,7 @@
         'data/parc_machine_data.xml',
         'views/res_partner_views.xml',
         'views/parc_machine_views.xml',
+        'views/stock_lot_views.xml',
     ],
     'installable': True,
     'application': True,
