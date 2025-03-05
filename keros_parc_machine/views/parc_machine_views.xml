@@ -21,10 +21,8 @@
         <field name="model">parc.machine</field>
         <field name="arch" type="xml">
             <form string="Parc Machine">
-                <!-- Header avec le bouton Envoyer en Réparation -->
-            <header>    
-                <!-- <button name="action_send_to_repair" string="Envoyer en Réparation" type="object"
-                        class="oe_highlight"/> -->
+
+            <header>
                 <field name="status" widget="statusbar" clickable="1"/>
             </header>
                 <sheet>
@@ -76,6 +74,7 @@
                             <field name="acquisition_date" readonly="1"/>
                             <field name="warranty_start_date"/>
                             <field name="warranty_end_date"/>
+                            <field name="keros_warranty_end_date"/>
                             <field name="rma_warranty_end_date"/>
                         </group>
                     </group>
@@ -87,8 +86,7 @@
                             <field name="loan_location"/>
                             <field name="location_id"/>
                         </group>
-                        <group string="RAM et RMA">
-                            <field name="ram_number"/>
+                        <group string="RMA">
                             <field name="rma_number"/>
                             <field name="comment" modifiers="{&quot;readonly&quot;: [[&quot;status&quot;, &quot;=&quot;, &quot;hors_service&quot;]]}"/>
                         </group>
@@ -102,6 +100,7 @@
                         <field name="delivery_order_number"/>
                     </group>
                 </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -143,7 +142,7 @@
 
                             <!-- Informations principales -->
                             <div class="o_kanban_record_details mt-2">
-                                <p><b>Partenaire :</b> <field name="partner_id"/></p>
+                                <p><b>Client :</b> <field name="partner_id"/></p>
                                 <p><b>Numéro de série :</b> <field name="serial_number"/></p>
                                 <p><b>Statut :</b> <field name="status"/></p>
                             </div>

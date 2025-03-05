@@ -7,10 +7,11 @@ _logger = logging.getLogger(__name__)
 class ParcMachine(models.Model):
     _name = 'parc.machine'
     _description = 'Parc Machine'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
 
     name = fields.Char(string='Nom', required=True)
     partner_id = fields.Many2one(
-        'res.partner', string='Partenaire', store=True)
+        'res.partner', string='Client', store=True, tracking=True)
     serial_number = fields.Many2one(
         'stock.lot', string='Numéro de Série', required=True)
     manufacturer = fields.Many2one(
@@ -23,24 +24,25 @@ class ParcMachine(models.Model):
         string='Date d\'Acquisition', compute='_compute_acquisition_date', store=True)
     warranty_start_date = fields.Date(string='Début Garantie')
     warranty_end_date = fields.Date(string='Fin Garantie')
+    keros_warranty_end_date = fields.Date(string='Fin Garantie Keros')
     rma_warranty_end_date = fields.Date(string='Fin Garantie si RMA + 1 an')
     status = fields.Selection([
         ('sav', 'SAV'),
         ('a_revenir', 'À revenir'),
         ('pret', 'Prêt'),
+        ('rma', 'RMA'),
         ('echange_standard', 'Échange standard'),
         ('reserve_location', 'Réservé location'),
-        ('ram', 'RAM'),
         ('hors_service', 'Hors Service')
     ], string='Statut', default='pret')
     loan_location = fields.Char(string='Lieu du prêt')
-    flash_count = fields.Integer(string='Nombre de Flashs')
-    flash_count_date = fields.Date(string='Date de relevé du nombre de flashs')
+    flash_count = fields.Integer(string='Nombre de Flashs', tracking=True)
+    flash_count_date = fields.Date(
+        string='Date de relevé du nombre de flashs', tracking=True)
     last_delivery_date = fields.Date(
-        string='Date d\'expédition', compute='_compute_last_delivery', store=True)
+        string='Date d\'expédition', compute='_compute_last_delivery', store=True, tracking=True)
     delivery_order_number = fields.Char(
-        string='Numéro du bon de livraison', compute='_compute_last_delivery', store=True)
-    ram_number = fields.Char(string='Numéro du RAM')
+        string='Numéro du bon de livraison', compute='_compute_last_delivery', store=True, tracking=True)
     comment = fields.Text(string='Commentaires')
     location_id = fields.Many2one(
         related='serial_number.location_id',
@@ -63,6 +65,7 @@ class ParcMachine(models.Model):
             ], order='date desc', limit=1)
             if delivery_move:
                 record.last_delivery_date = delivery_move.date
+                record.warranty_start_date = record.last_delivery_date
                 record.delivery_order_number = delivery_move.picking_id.name
             else:
                 record.last_delivery_date = False
@@ -108,66 +111,9 @@ class ParcMachine(models.Model):
             else:
                 self.loan_location = False
                 _logger.info("No ongoing loan location found")
-
-    # @api.onchange('status')
-    # def _onchange_status(self):
-    #     if self.status == 'hors_service':
-    #         self.send_email_to_mariette()
-    #         _logger.info(
-    #             f"Status changed to 'Hors Service' for record {self.id}")
-
-    # def send_email_to_mariette(self):
-    #     template = self.env.ref(
-    #         'keros_parc_machine.email_template_hors_service')
-    #     if template:
-    #         template.send_mail(self.id, force_send=True)
-    #         _logger.info(f"Email sent to Mariette for record {self.id}")
-    #     else:
-    #         _logger.error(
-    #             "Email template 'keros_parc_machine.email_template_hors_service' not found")
-
-    # def action_send_to_repair(self):
-    #     for record in self:
-    #         _logger.debug(f"Sending machine {record.name} to repair")
-    #         if record.product_id:
-    #             # Création de la demande de réparation
-    #             repair_vals = {
-    #                 'product_id': record.product_id.id,
-    #                 'product_qty': 1.0,
-    #                 'product_uom': record.product_id.uom_id.id,
-    #                 'name': f"Réparation - {record.name}",
-    #                 'lot_id': record.serial_number.id,
-    #                 'location_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
-    #                 'location_dest_id': record.location_id.id or self.env.ref('stock.stock_location_stock').id,
-    #             }
-    #             repair_order = self.env['repair.order'].create(repair_vals)
-    #             _logger.info(
-    #                 f"Repair order {repair_order.name} created for machine {record.name}")
-
-    #             # Changer le statut de la machine (optionnel)
-    #             record.status = 'sav'
-
-    #             # Ouvrir la vue formulaire de la réparation créée
-    #             return {
-    #                 'type': 'ir.actions.act_window',
-    #                 'name': 'Demande de Réparation',
-    #                 'view_mode': 'form',
-    #                 'res_model': 'repair.order',
-    #                 'res_id': repair_order.id,
-    #                 'target': 'current',  # Ouvre la vue dans une nouvelle fenêtre
-    #             }
-    #         else:
-    #             _logger.error(
-    #                 f"No product associated with machine {record.name}")
-    #             return {
-    #                 'type': 'ir.actions.client',
-    #                 'tag': 'display_notification',
-    #                 'params': {
-    #                     'title': 'Erreur',
-    #                     'message': 'Aucun produit associé à cette machine.',
-    #                     'sticky': False,
-    #                 }
-    #             }
+            if self.product_id:
+                self.name = self.product_id.name
+                _logger.info(f"Nom du produit: {self.name}")
 
     def action_view_form(self):
         self.ensure_one()
