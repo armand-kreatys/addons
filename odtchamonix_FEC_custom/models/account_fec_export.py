@@ -24,41 +24,69 @@ class CustomFecExportWizard(models.TransientModel):
         with io.StringIO(content) as fecfile:
             reader = csv.reader(fecfile, delimiter='|')
             header = next(reader)  # En-tête du fichier
+            # Ajouter une nouvelle colonne "Analytique"
+            header.append("Analytique")
             rows_to_write.append(header)
 
             for row in reader:
-                compte_lib = row[5]  # CompteLib
-                comp_aux_num = row[6]  # CompAuxNum
+                journal_code = row[0]       # JournalCode
+                compte_num = row[4]         # CompteNum
+                compte_lib = row[5]         # CompteLib
+                ecriture_lib = row[10]      # EcritureLib
+                # PieceDate (date de la pièce comptable)
+                piece_date = row[9]
 
-                _logger.info(
-                    f"Processing row - CompteLib: '{compte_lib}', Original CompAuxNum: '{comp_aux_num}'")
+                # *** Modifications dans la colonne "JournalCode" ***
+                if journal_code == "CSCHX":
+                    journal_code = "CECHX"
+                elif journal_code == "CCD1":
+                    journal_code = "CSCHX"
+                row[0] = journal_code
 
-                # Si CompAuxNum est déjà rempli, on ne fait rien
-                if comp_aux_num.strip():
-                    _logger.info(
-                        f"CompAuxNum already filled: '{comp_aux_num}'. Skipping extraction.")
-                    rows_to_write.append(row)
-                    continue
+                # *** Modifications dans la colonne "CompteNum" ***
+                if compte_num == "4710000":
+                    compte_num = "5111100"
+                row[4] = compte_num
 
-                # Si CompAuxNum est vide et que CompteLib contient " / ", extraire la partie après " / "
-                if not comp_aux_num.strip() and " / " in compte_lib:
-                    try:
-                        comp_aux_num = compte_lib.split(" / ", 1)[1].strip()
-                        # Supprimer les virgules et nettoyer la valeur
-                        comp_aux_num = comp_aux_num.replace(
-                            ',', '').replace('.', '')
-                        _logger.info(
-                            f"Extracted and cleaned CompAuxNum from CompteLib: '{comp_aux_num}'")
-                    except Exception as e:
-                        _logger.error(
-                            f"Error extracting CompAuxNum from CompteLib: {e}")
-                        comp_aux_num = ""
+                # *** Modifications dans la colonne "CompteLib" ***
+                if compte_lib == "Compte attente divers":
+                    compte_lib = "Espèces à encaisser Chamonix"
+                row[5] = compte_lib
+
+                # Remplacements spécifiques basés sur des motifs
+                if "Paiement manuel : Carte paiement Pdv" in ecriture_lib:
+                    ecriture_lib = f"Paiement CB {piece_date}"
+                elif "Paiement manuel : Chèques vacances paiement Pdv" in ecriture_lib:
+                    ecriture_lib = f"Paiement ANCV {piece_date}"
+                elif "Paiement manuel : Chèques paiement Pdv" in ecriture_lib:
+                    ecriture_lib = f"Paiement CHQ {piece_date}"
+
+                # *** Modifications dans la colonne "EcritureLib" ***
+                if compte_num in ["4457150", "4457220", "7073500", "707100", "7078200", "7072300"]:
+                    ecriture_lib = "CLIENT BOUTIQUE CHAMONIX"
                 else:
-                    _logger.info(
-                        f"No extraction needed. Using original CompAuxNum: '{comp_aux_num}'")
+                    ecriture_lib = ecriture_lib.replace("Carte", "CB")
+                    ecriture_lib = ecriture_lib.replace(
+                        "Chèques vacances", "ANCV")
+                    ecriture_lib = ecriture_lib.replace("Chèques", "CHQ")
+                    ecriture_lib = ecriture_lib.replace("Espèces", "ESP")
 
-                # Mettre à jour la colonne CompAuxNum
-                row[6] = comp_aux_num
+                row[10] = ecriture_lib
+
+                # *** Ajout de la colonne analytique ***
+                if compte_num.startswith("707"):
+                    analytique = "ACCU250TA"
+                elif compte_num == "7088100":
+                    analytique = "ACCU260TA"
+                elif compte_num == "7085100":
+                    analytique = "ACCU265TA"
+                elif compte_num == "7085200":
+                    analytique = "ACCU265NT"
+                else:
+                    analytique = ""
+                row.append(analytique)
+
+                # Ajouter la ligne modifiée à la liste
                 rows_to_write.append(row)
 
         # Réécrire les données modifiées dans un nouveau fichier CSV

@@ -1,0 +1,36 @@
+Dans la colonne "JournalCode" :
+Remplacer CSCHX par CECHX
+Remplacer CCD1 par CSCHX
+
+Dans la colonne "CompteNum" :
+Remplacer 4710000 par 5111100
+
+Dans la colonne "CompteLib" :
+Remplacer "Compte attente divers" par "Espèces à encaisser Chamonix"
+
+Dans la colonne "EcritureLib" :
+Si à la colonne "CompteLib" il y a "4457150", "4457220", "4457220", "7073500", "707100", "7078200", ou "7072300"  mettre "CLIENT BOUTIQUE CHAMONIX"
+Remplacer seulement le mot "Carte" par "CB" en gardant le nom de la pièce comptable au début
+Remplacer seulement les caractères "Chèques vacances" par "ANCV" en gardant le nom de la pièce comptable au début
+Remplacer seulement le mot "Chèques" par "CHQ" en gardant le nom de la pièce comptable au début
+Remplacer seulement le mot "Espèces" par "ESP" en gardant le nom de la pièce comptable au début
+
+Remplacer :
+Paiement manuel : Carte paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CB du <date>
+Paiement manuel : Carte paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CB <date>
+Paiement manuel : Chèques vacances paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement ANCV <date>
+Paiement manuel : Chèques vacances paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement ANCV <date>
+Paiement manuel : Chèques paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CHQ <date>
+Paiement manuel : Chèques paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CHQ <date>
+Paiement manuel : Carte paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CB <date>
+Paiement manuel : Carte paiement Pdv de CLIENT BOUTIQUE CHAMONIX en POS/00017 par Paiement CB <date>
+
+En prenant soin de mettre la date de la pièce comptable qui est colonne PieceDate
+
+
+Ajoute une colonne analytique à la fin respectant ces règles par rapport à la colonne "CompteNum" :
+* Comptes 707xxxx -> analytique = ACCU250TA
+* Compte 7088100 -> analytique = ACCU260TA
+* Compte 7085100 -> analytique = ACCU265TA
+* Compte 7085200 -> analytique = ACCU265NT
+
