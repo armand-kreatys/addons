@@ -41,6 +41,7 @@ class CustomFecExportWizard(models.TransientModel):
                     journal_code = "CECHX"
                 elif journal_code == "CCD1":
                     journal_code = "CSCHX"
+
                 row[0] = journal_code
 
                 # *** Modifications dans la colonne "CompteNum" ***
@@ -65,6 +66,8 @@ class CustomFecExportWizard(models.TransientModel):
                 if compte_num in ["4457150", "4457220", "7073500", "707100", "7078200", "7072300"]:
                     ecriture_lib = "CLIENT BOUTIQUE CHAMONIX"
                 else:
+                    ecriture_lib = ecriture_lib.replace("Carte bleue", "CB")
+                    ecriture_lib = ecriture_lib.replace("Carte Bleue", "CB")
                     ecriture_lib = ecriture_lib.replace("Carte", "CB")
                     ecriture_lib = ecriture_lib.replace(
                         "Chèques vacances", "ANCV")
