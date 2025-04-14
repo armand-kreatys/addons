@@ -12,7 +12,7 @@
     </record>
 
     <!-- Menu Assistance -->
-    <menuitem id="menu_parc_machine_helpdesk" name="Parc Machine" parent="helpdesk.menu_helpdesk_root" action="action_parc_machine" sequence="100"/>
+    <menuitem id="menu_parc_machine_helpdesk" name="Parc Machine" parent="helpdesk.menu_helpdesk_root" action="action_parc_machine" sequence="100" />
 
 
     <!-- Vue Forme -->
@@ -119,40 +119,69 @@
                 <field name="warranty_end_date"/>
                 <button name="action_view_form" type="object" string="Voir Détails" class="oe_highlight"/>
             </list>
-        </field>
-    </record>
-
-    <!-- Vue Kanban -->
-    <record id="view_parc_machine_kanban" model="ir.ui.view">
-        <field name="name">parc.machine.kanban</field>
-        <field name="model">parc.machine</field>
-        <field name="arch" type="xml">
-            <kanban default_group_by="status">
                 <field name="status"/>
                 <field name="partner_id"/>
                 <field name="serial_number"/>
                 <templates>
-                    <t t-name="kanban-box">
+                    <!--<t t-name="kanban-box">
                         <div class="oe_kanban_global_click o_kanban_record card text-center"
                             style="background-color: #eaeaea; border: 1px solid #ccc; padding: 10px; border-radius: 5px;">
-                            <!-- Titre de la machine -->
+                            <!- Titre de la machine ->
                             <div class="o_kanban_record_title">
                                 <strong><field name="name"/></strong>
                             </div>
 
-                            <!-- Informations principales -->
+                            <!- Informations principales ->
                             <div class="o_kanban_record_details mt-2">
                                 <p><b>Client :</b> <field name="partner_id"/></p>
                                 <p><b>Numéro de série :</b> <field name="serial_number"/></p>
                                 <p><b>Statut :</b> <field name="status"/></p>
                             </div>
 
-                            <!-- Actions rapides -->
+                            <!- Actions rapides ->
                             <div class="mt-2">
                                 <button type="object" name="action_view_form" class="btn btn-primary btn-sm">
                                     Voir Détails
                                 </button>
                             </div>
+                        </div>
+                    </t>-->
+                    <t t-name="card">
+                        <style>
+                            article:has(.keros-custom-card) {
+                            margin-bottom: .5rem!important;
+                            transition: transform .4s;
+                            }
+                            article:has(.keros-custom-card):hover {
+                            transform: translateY(-.25rem);
+                            }
+                            .keros-custom-card,
+                            .keros-custom-card .badge {
+                            transition: background-color .4s, color .4s;
+                            }
+                            .keros-custom-card:hover {
+                            background-color: var(--200);
+                            }
+                            .keros-custom-card:hover span.badge {
+                            background-color: var(--o-cc1-btn-primary)!important;
+                            color: var(--100)!important;
+                            }
+                        </style>
+                        <div class="p-3 keros-custom-card">
+                            <div class="w-100 d-flex m-0 p-0">
+                                <field class="fw-bolder" name="name" />
+                                <field name="status" widget="badge" class="ms-auto" />
+                            </div>
+                            <footer class="m-0 p-0 mt-2 text-muted">
+                                <div>
+                                    <strong>Client : </strong>
+                                    <field name="partner_id" />
+                                </div>
+                                <div>
+                                    <strong>Numéro de série : </strong>
+                                    <field name="serial_number" />
+                                </div>
+                            </footer>
                         </div>
                     </t>
                 </templates>

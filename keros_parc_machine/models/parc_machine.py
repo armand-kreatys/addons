@@ -27,6 +27,7 @@ class ParcMachine(models.Model):
     keros_warranty_end_date = fields.Date(string='Fin Garantie Keros')
     rma_warranty_end_date = fields.Date(string='Fin Garantie si RMA + 1 an')
     status = fields.Selection([
+        ('client', 'Client'),
         ('sav', 'SAV'),
         ('a_revenir', 'À revenir'),
         ('pret', 'Prêt'),
